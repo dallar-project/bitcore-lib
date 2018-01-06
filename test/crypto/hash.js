@@ -136,4 +136,18 @@ describe('Hash', function() {
 
   });
 
+  describe('#throestl', function() {
+
+    it('calculates the hash of this buffer correctly', function() {
+      var hash = Hash.throesl(buf);
+      console.log('\n' + hash.toString('hex') + '\n');
+      hash.toString('hex').should.equal('6f2c7b22fd1626998287b3636089087961091de80311b9279c4033ec678a83e8');
+    });
+
+    it('fails when the input is not a buffer', function() {
+      Hash.sha256.bind(Hash, str).should.throw('Invalid Argument');
+    });
+
+  });
+
 });

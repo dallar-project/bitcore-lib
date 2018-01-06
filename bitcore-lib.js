@@ -10,6 +10,7 @@ var Networks = require('./networks');
 var Hash = require('./crypto/hash');
 var JSUtil = require('./util/js');
 var PublicKey = require('./publickey');
+var throestl = require('node-throestl-hash');
 
 /**
  * Instantiate an address from an address String or Buffer, a public key or script hash Buffer,
@@ -717,7 +718,7 @@ Block.prototype.getMerkleTree = function getMerkleTree() {
     for (var i = 0; i < size; i += 2) {
       var i2 = Math.min(i + 1, size - 1);
       var buf = Buffer.concat([tree[j + i], tree[j + i2]]);
-      tree.push(Hash.sha256sha256(buf));
+      tree.push(Hash.throestl(buf));
     }
     j += size;
   }
@@ -802,7 +803,7 @@ var Hash = require('../crypto/hash');
 var JSUtil = require('../util/js');
 var $ = require('../util/preconditions');
 
-var GENESIS_BITS = 0x1d00ffff;
+var GENESIS_BITS = 0x1e0fffff;
 
 /**
  * Instantiate a BlockHeader from a Buffer, JSON object, or Object with
@@ -1029,7 +1030,7 @@ BlockHeader.prototype.getDifficulty = function getDifficulty() {
  */
 BlockHeader.prototype._getHash = function hash() {
   var buf = this.toBuffer();
-  return Hash.sha256sha256(buf);
+  return Hash.throestl(buf);
 };
 
 var idProperty = {
@@ -1328,7 +1329,7 @@ MerkleBlock.prototype._traverseMerkleTree = function traverseMerkleTree(depth, p
     if (checkForTxs){
       return opts.txs;
     } else {
-      return Hash.sha256sha256(new Buffer.concat([left, right]));
+      return Hash.throestl(new Buffer.concat([left, right]));
     };
   }
 };
@@ -1942,11 +1943,6 @@ Hash.sha256 = function(buf) {
 
 Hash.sha256.blocksize = 512;
 
-Hash.sha256sha256 = function(buf) {
-  $.checkArgument(BufferUtil.isBuffer(buf));
-  return Hash.sha256(Hash.sha256(buf));
-};
-
 Hash.ripemd160 = function(buf) {
   $.checkArgument(BufferUtil.isBuffer(buf));
   return crypto.createHash('ripemd160').update(buf).digest();
@@ -1961,6 +1957,12 @@ Hash.sha512 = function(buf) {
   $.checkArgument(BufferUtil.isBuffer(buf));
   return crypto.createHash('sha512').update(buf).digest();
 };
+
+Hash.throestl = function(buf) {
+  $.checkArgument(BufferUtil.isBuffer(buf));
+  return throestl.digest(buf);
+};
+
 
 Hash.sha512.blocksize = 1024;
 
@@ -2620,7 +2622,6 @@ module.exports = Base58;
 var _ = require('lodash');
 var Base58 = require('./base58');
 var buffer = require('buffer');
-var sha256sha256 = require('../crypto/hash').sha256sha256;
 
 var Base58Check = function Base58Check(obj) {
   if (!(this instanceof Base58Check))
@@ -2667,7 +2668,7 @@ Base58Check.decode = function(s) {
   var data = buf.slice(0, -4);
   var csum = buf.slice(-4);
 
-  var hash = sha256sha256(data);
+  var hash = throestl(data);
   var hash4 = hash.slice(0, 4);
 
   if (csum.toString('hex') !== hash4.toString('hex'))
@@ -2677,7 +2678,7 @@ Base58Check.decode = function(s) {
 };
 
 Base58Check.checksum = function(buffer) {
-  return sha256sha256(buffer).slice(0, 4);
+  return throestl(buffer).slice(0, 4);
 };
 
 Base58Check.encode = function(buf) {
@@ -6945,7 +6946,7 @@ Interpreter.prototype.step = function() {
           } else if (opcodenum === Opcode.OP_HASH160) {
             bufHash = Hash.sha256ripemd160(buf);
           } else if (opcodenum === Opcode.OP_HASH256) {
-            bufHash = Hash.sha256sha256(buf);
+            bufHash = Hash.throestl(buf);
           }
           this.stack.pop();
           this.stack.push(bufHash);
@@ -9288,7 +9289,7 @@ var sighash = function sighash(transaction, sighashType, inputNumber, subscript)
     .write(txcopy.toBuffer())
     .writeInt32LE(sighashType)
     .toBuffer();
-  var ret = Hash.sha256sha256(buf);
+  var ret = Hash.throestl(buf);
   ret = new BufferReader(ret).readReverse();
   return ret;
 };
@@ -9563,7 +9564,7 @@ Object.defineProperty(Transaction.prototype, 'outputAmount', ioProperty);
  * @return {Buffer}
  */
 Transaction.prototype._getHash = function() {
-  return Hash.sha256sha256(this.toBuffer());
+  return Hash.throestl(this.toBuffer());
 };
 
 /**

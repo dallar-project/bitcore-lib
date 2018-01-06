@@ -28,7 +28,7 @@ async.series([
       buffers.push(br.toBuffer());
 
       // hashes
-      var data = bitcore.crypto.Hash.sha256sha256(new Buffer(32));
+      var data = bitcore.crypto.Hash.throestl(new Buffer(32));
       hashBuffers.push(data);
     }
 
