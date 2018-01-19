@@ -10,7 +10,6 @@ var Networks = require('./networks');
 var Hash = require('./crypto/hash');
 var JSUtil = require('./util/js');
 var PublicKey = require('./publickey');
-var throestl = require('node-throestl-hash');
 
 /**
  * Instantiate an address from an address String or Buffer, a public key or script hash Buffer,
@@ -1960,7 +1959,7 @@ Hash.sha512 = function(buf) {
 
 Hash.throestl = function(buf) {
   $.checkArgument(BufferUtil.isBuffer(buf));
-  return throestl.digest(buf);
+  return Buffer.from(throestl.groestl_3([...buf], 1, 1))
 };
 
 
@@ -2668,7 +2667,7 @@ Base58Check.decode = function(s) {
   var data = buf.slice(0, -4);
   var csum = buf.slice(-4);
 
-  var hash = throestl(data);
+  var hash = Hash.throestl(data);
   var hash4 = hash.slice(0, 4);
 
   if (csum.toString('hex') !== hash4.toString('hex'))
@@ -2678,7 +2677,7 @@ Base58Check.decode = function(s) {
 };
 
 Base58Check.checksum = function(buffer) {
-  return throestl(buffer).slice(0, 4);
+  return Hash.throestl(buffer).slice(0, 4);
 };
 
 Base58Check.encode = function(buf) {
