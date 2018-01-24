@@ -11114,8 +11114,8 @@ URI.isValid = function(arg, knownParams) {
 URI.parse = function(uri) {
   var info = URL.parse(uri, true);
 
-  if (info.protocol !== 'bitcoin:') {
-    throw new TypeError('Invalid bitcoin URI');
+  if (info.protocol !== 'dallar:') {
+    throw new TypeError('Invalid dallar URI');
   }
 
   // workaround to host insensitiveness
@@ -11131,7 +11131,7 @@ URI.Members = ['address', 'amount', 'message', 'label', 'r'];
  * Internal function to load the URI instance with an object.
  *
  * @param {Object} obj - Object with the information
- * @throws {TypeError} Invalid bitcoin address
+ * @throws {TypeError} Invalid dallar address
  * @throws {TypeError} Invalid amount
  * @throws {Error} Unknown required argument
  */
@@ -11139,7 +11139,7 @@ URI.prototype._fromObject = function(obj) {
   /* jshint maxcomplexity: 10 */
 
   if (!Address.isValid(obj.address)) {
-    throw new TypeError('Invalid bitcoin address');
+    throw new TypeError('Invalid dallar address');
   }
 
   this.address = new Address(obj.address);
@@ -11209,7 +11209,7 @@ URI.prototype.toString = function() {
   _.extend(query, this.extras);
 
   return URL.format({
-    protocol: 'bitcoin:',
+    protocol: 'dallar:',
     host: this.address,
     query: query
   });
